@@ -248,6 +248,23 @@ void WatchFaceHybrid::Refresh() {
   // I'll invert this for now. But a ble diconnected icon would be better
     if (!bleState.Get()) {
       lv_label_set_text_static(bleIcon, Symbols::bluetooth);
+
+      // hack-ish workaround to draw a line ontop of the bluetooth icon
+      static lv_point_t line_points_ble[] = {{228, 0}, {204, 18}}; // 9
+
+      /*Create thin line style*/
+      static lv_style_t style_line_ble;
+      lv_style_init(&style_line_ble);
+      lv_style_set_line_width(&style_line_ble, LV_STATE_DEFAULT, 2);
+      lv_style_set_line_color(&style_line_ble, LV_STATE_DEFAULT, LV_COLOR_WHITE);
+      // lv_style_set_line_rounded(&style_line_ble, LV_STATE_DEFAULT, true);
+
+      /*Create a line and apply the new style*/
+      lv_obj_t * line_ble;
+      line_ble = lv_line_create(lv_scr_act(), NULL);
+      lv_line_set_points(line_ble, line_points_ble, 2);     /*Set the points*/
+      lv_obj_add_style(line_ble, LV_LINE_PART_MAIN, &style_line_ble);     /*Set the points*/
+
     } else {
       lv_label_set_text_static(bleIcon, "");
     }
