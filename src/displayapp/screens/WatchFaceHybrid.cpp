@@ -95,8 +95,10 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
 
   // create 12, 3, 6, and 9 oclock lines
   // 9
-  static lv_point_t line_points_9[] = {{0, 120}, {35, 120}}; // 9
   static lv_point_t line_points_12[] = {{120, 0}, {120, 35}}; // 12
+  static lv_point_t line_points_3[] = {{240, 120}, {205 , 120}}; // 3
+  static lv_point_t line_points_6[] = {{120, 240}, {120, 205}}; // 6
+  static lv_point_t line_points_9[] = {{0, 120}, {35, 120}}; // 9
 
   /*Create style*/
   static lv_style_t style_line;
@@ -106,16 +108,27 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
   // lv_style_set_line_rounded(&style_line, LV_STATE_DEFAULT, true);
 
   /*Create a line and apply the new style*/
-  lv_obj_t * line9;
   lv_obj_t * line12;
-  line9 = lv_line_create(lv_scr_act(), NULL);
+  lv_obj_t * line3;
+  lv_obj_t * line6;
+  lv_obj_t * line9;
+
   line12 = lv_line_create(lv_scr_act(), NULL);
-  lv_line_set_points(line9, line_points_9, 2);     /*Set the points*/
+  line3 = lv_line_create(lv_scr_act(), NULL);
+  line6 = lv_line_create(lv_scr_act(), NULL);
+  line9 = lv_line_create(lv_scr_act(), NULL);
+
   lv_line_set_points(line12, line_points_12, 2);     /*Set the points*/
-  lv_obj_add_style(line9, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
+  lv_line_set_points(line3, line_points_3, 2);     /*Set the points*/
+  lv_line_set_points(line6, line_points_6, 2);     /*Set the points*/
+  lv_line_set_points(line9, line_points_9, 2);     /*Set the points*/
+
   lv_obj_add_style(line12, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
+  lv_obj_add_style(line3, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
+  lv_obj_add_style(line6, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
+  lv_obj_add_style(line9, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
   // lv_obj_align(line1, NULL, LV_ALIGN_CENTER, 0, 0);
-  // Finish test line
+  // Finish the 12, 3, 6, and 9 oclock lines
 
   lv_style_init(&second_line_style);
   lv_style_set_line_width(&second_line_style, LV_STATE_DEFAULT, 3);
