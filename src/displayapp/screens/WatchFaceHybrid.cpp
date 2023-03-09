@@ -59,9 +59,9 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
   sMinute = 99;
   sSecond = 99;
 
-  lv_obj_t* bg_clock_img = lv_img_create(lv_scr_act(), nullptr);
-  lv_img_set_src(bg_clock_img, &bg_clock);
-  lv_obj_align(bg_clock_img, nullptr, LV_ALIGN_CENTER, 0, 0);
+  // lv_obj_t* bg_clock_img = lv_img_create(lv_scr_act(), nullptr);
+  // lv_img_set_src(bg_clock_img, &bg_clock);
+  // lv_obj_align(bg_clock_img, nullptr, LV_ALIGN_CENTER, 0, 0);
 
   batteryIcon.Create(lv_scr_act());
   lv_obj_align(batteryIcon.GetObject(), nullptr, LV_ALIGN_IN_TOP_RIGHT, 0, 0);
@@ -82,7 +82,7 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
   // Date - Day / Week day
 
   label_date_day = lv_label_create(lv_scr_act(), nullptr);
-  lv_obj_set_style_local_text_color(label_date_day, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, Colors::orange);
+  lv_obj_set_style_local_text_color(label_date_day, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE); // Colors::orange is LV_COLOR_MAKE(0xff, 0xb0, 0x0)
   lv_label_set_text_fmt(label_date_day, "%s\n%02i", dateTimeController.DayOfWeekShortToString(), dateTimeController.Day());
   lv_label_set_align(label_date_day, LV_LABEL_ALIGN_CENTER);
   lv_obj_align(label_date_day, nullptr, LV_ALIGN_CENTER, 50, 0);
@@ -92,6 +92,30 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
   hour_body = lv_line_create(lv_scr_act(), nullptr);
   hour_body_trace = lv_line_create(lv_scr_act(), nullptr);
   second_body = lv_line_create(lv_scr_act(), nullptr);
+
+  // create 12, 3, 6, and 9 oclock lines
+  // 9
+  static lv_point_t line_points_9[] = {{0, 120}, {35, 120}}; // 9
+  static lv_point_t line_points_12[] = {{120, 0}, {120, 35}}; // 12
+
+  /*Create style*/
+  static lv_style_t style_line;
+  lv_style_init(&style_line);
+  lv_style_set_line_width(&style_line, LV_STATE_DEFAULT, 5);
+  lv_style_set_line_color(&style_line, LV_STATE_DEFAULT, LV_COLOR_WHITE);
+  // lv_style_set_line_rounded(&style_line, LV_STATE_DEFAULT, true);
+
+  /*Create a line and apply the new style*/
+  lv_obj_t * line9;
+  lv_obj_t * line12;
+  line9 = lv_line_create(lv_scr_act(), NULL);
+  line12 = lv_line_create(lv_scr_act(), NULL);
+  lv_line_set_points(line9, line_points_9, 2);     /*Set the points*/
+  lv_line_set_points(line12, line_points_12, 2);     /*Set the points*/
+  lv_obj_add_style(line9, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
+  lv_obj_add_style(line12, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
+  // lv_obj_align(line1, NULL, LV_ALIGN_CENTER, 0, 0);
+  // Finish test line
 
   lv_style_init(&second_line_style);
   lv_style_set_line_width(&second_line_style, LV_STATE_DEFAULT, 3);
@@ -208,7 +232,8 @@ void WatchFaceHybrid::Refresh() {
 
   bleState = bleController.IsConnected();
   if (bleState.IsUpdated()) {
-    if (bleState.Get()) {
+  // I'll invert this for now. But a ble diconnected icon would be better
+    if (!bleState.Get()) {
       lv_label_set_text_static(bleIcon, Symbols::bluetooth);
     } else {
       lv_label_set_text_static(bleIcon, "");
