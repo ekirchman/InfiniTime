@@ -94,7 +94,6 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
   second_body = lv_line_create(lv_scr_act(), nullptr);
 
   // create 12, 3, 6, and 9 oclock lines
-  // 9
   static lv_point_t line_points_12[] = {{120, 0}, {120, 35}}; // 12
   static lv_point_t line_points_3[] = {{240, 120}, {205 , 120}}; // 3
   static lv_point_t line_points_6[] = {{120, 240}, {120, 205}}; // 6
@@ -103,9 +102,8 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
   /*Create style*/
   static lv_style_t style_line;
   lv_style_init(&style_line);
-  lv_style_set_line_width(&style_line, LV_STATE_DEFAULT, 5);
+  lv_style_set_line_width(&style_line, LV_STATE_DEFAULT, 2);
   lv_style_set_line_color(&style_line, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-  // lv_style_set_line_rounded(&style_line, LV_STATE_DEFAULT, true);
 
   /*Create a line and apply the new style*/
   lv_obj_t * line12;
@@ -132,33 +130,37 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
 
   lv_style_init(&second_line_style);
   lv_style_set_line_width(&second_line_style, LV_STATE_DEFAULT, 3);
-  lv_style_set_line_color(&second_line_style, LV_STATE_DEFAULT, LV_COLOR_RED);
-  lv_style_set_line_rounded(&second_line_style, LV_STATE_DEFAULT, true);
+  lv_style_set_line_color(&second_line_style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
+  // lv_style_set_line_rounded(&second_line_style, LV_STATE_DEFAULT, true);
   lv_obj_add_style(second_body, LV_LINE_PART_MAIN, &second_line_style);
 
   lv_style_init(&minute_line_style);
-  lv_style_set_line_width(&minute_line_style, LV_STATE_DEFAULT, 7);
+  lv_style_set_line_width(&minute_line_style, LV_STATE_DEFAULT, 4);
   lv_style_set_line_color(&minute_line_style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-  lv_style_set_line_rounded(&minute_line_style, LV_STATE_DEFAULT, true);
+  // lv_style_set_line_rounded(&minute_line_style, LV_STATE_DEFAULT, true);
   lv_obj_add_style(minute_body, LV_LINE_PART_MAIN, &minute_line_style);
 
   lv_style_init(&minute_line_style_trace);
   lv_style_set_line_width(&minute_line_style_trace, LV_STATE_DEFAULT, 3);
   lv_style_set_line_color(&minute_line_style_trace, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-  lv_style_set_line_rounded(&minute_line_style_trace, LV_STATE_DEFAULT, false);
-  lv_obj_add_style(minute_body_trace, LV_LINE_PART_MAIN, &minute_line_style_trace);
+  // lv_style_set_line_rounded(&minute_line_style_trace, LV_STATE_DEFAULT, false);
+  // lv_obj_add_style(minute_body_trace, LV_LINE_PART_MAIN, &minute_line_style_trace);
 
   lv_style_init(&hour_line_style);
   lv_style_set_line_width(&hour_line_style, LV_STATE_DEFAULT, 7);
-  lv_style_set_line_color(&hour_line_style, LV_STATE_DEFAULT, LV_COLOR_WHITE);
+  lv_style_set_line_color(&hour_line_style, LV_STATE_DEFAULT, LV_COLOR_RED);
   lv_style_set_line_rounded(&hour_line_style, LV_STATE_DEFAULT, true);
   lv_obj_add_style(hour_body, LV_LINE_PART_MAIN, &hour_line_style);
 
   lv_style_init(&hour_line_style_trace);
   lv_style_set_line_width(&hour_line_style_trace, LV_STATE_DEFAULT, 3);
-  lv_style_set_line_color(&hour_line_style_trace, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-  lv_style_set_line_rounded(&hour_line_style_trace, LV_STATE_DEFAULT, false);
-  lv_obj_add_style(hour_body_trace, LV_LINE_PART_MAIN, &hour_line_style_trace);
+  lv_style_set_line_color(&hour_line_style_trace, LV_STATE_DEFAULT, LV_COLOR_RED);
+  // lv_style_set_line_rounded(&hour_line_style_trace, LV_STATE_DEFAULT, false);
+  // lv_obj_add_style(hour_body_trace, LV_LINE_PART_MAIN, &hour_line_style_trace);
+
+  //Add digital time
+  label_time = lv_label_create(lv_scr_act(), nullptr);
+  // lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_extrabold_compressed);
 
   taskRefresh = lv_task_create(RefreshTaskCallback, LV_DISP_DEF_REFR_PERIOD, LV_TASK_PRIO_MID, this);
 
@@ -184,7 +186,7 @@ void WatchFaceHybrid::UpdateClock() {
 
   if (sMinute != minute) {
     auto const angle = minute * 6;
-    minute_point[0] = CoordinateRelocate(30, angle);
+    minute_point[0] = CoordinateRelocate(0, angle);
     minute_point[1] = CoordinateRelocate(MinuteLength, angle);
 
     minute_point_trace[0] = CoordinateRelocate(5, angle);
@@ -199,7 +201,7 @@ void WatchFaceHybrid::UpdateClock() {
     sMinute = minute;
     auto const angle = (hour * 30 + minute / 2);
 
-    hour_point[0] = CoordinateRelocate(30, angle);
+    hour_point[0] = CoordinateRelocate(0, angle);
     hour_point[1] = CoordinateRelocate(HourLength, angle);
 
     hour_point_trace[0] = CoordinateRelocate(5, angle);
@@ -207,6 +209,17 @@ void WatchFaceHybrid::UpdateClock() {
 
     lv_line_set_points(hour_body, hour_point, 2);
     lv_line_set_points(hour_body_trace, hour_point_trace, 2);
+
+    //update digital time
+    //hardcode 12 hour time
+    uint8_t twelve_hour;
+    if(hour > 12){
+      twelve_hour = hour - 12;
+    }else{
+      twelve_hour = hour;
+    }
+    lv_label_set_text_fmt(label_time, "%2d:%02d", twelve_hour, minute);
+    lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_CENTER, 0, 50);
   }
 
   if (sSecond != second) {
