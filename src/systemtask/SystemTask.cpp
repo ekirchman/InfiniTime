@@ -18,8 +18,6 @@
 #include "BootErrors.h"
 
 #include <memory>
-#include <algorithm>
-#include <cstring>
 
 using namespace Pinetime::System;
 
@@ -27,20 +25,6 @@ namespace {
   inline bool in_isr() {
     return (SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0;
   }
-}
-
-void DimTimerCallback(TimerHandle_t xTimer) {
-
-  NRF_LOG_INFO("DimTimerCallback");
-  auto* sysTask = static_cast<SystemTask*>(pvTimerGetTimerID(xTimer));
-  sysTask->OnDim();
-}
-
-void IdleTimerCallback(TimerHandle_t xTimer) {
-
-  NRF_LOG_INFO("IdleTimerCallback");
-  auto* sysTask = static_cast<SystemTask*>(pvTimerGetTimerID(xTimer));
-  sysTask->OnIdle();
 }
 
 void MeasureBatteryTimerCallback(TimerHandle_t xTimer) {
@@ -55,7 +39,6 @@ SystemTask::SystemTask(Drivers::SpiMaster& spi,
                        Controllers::Battery& batteryController,
                        Controllers::Ble& bleController,
                        Controllers::DateTime& dateTimeController,
-                       Controllers::TimerController& timerController,
                        Controllers::AlarmController& alarmController,
                        Drivers::Watchdog& watchdog,
                        Pinetime::Controllers::NotificationManager& notificationManager,
@@ -76,7 +59,6 @@ SystemTask::SystemTask(Drivers::SpiMaster& spi,
     batteryController {batteryController},
     bleController {bleController},
     dateTimeController {dateTimeController},
-    timerController {timerController},
     alarmController {alarmController},
     watchdog {watchdog},
     notificationManager {notificationManager},
@@ -117,9 +99,9 @@ void SystemTask::Process(void* instance) {
 void SystemTask::Work() {
   BootErrors bootError = BootErrors::None;
 
-  watchdog.Setup(7);
+  watchdog.Setup(7, Drivers::Watchdog::SleepBehaviour::Run, Drivers::Watchdog::HaltBehaviour::Pause);
   watchdog.Start();
-  NRF_LOG_INFO("Last reset reason : %s", Pinetime::Drivers::Watchdog::ResetReasonToString(watchdog.ResetReason()));
+  NRF_LOG_INFO("Last reset reason : %s", Pinetime::Drivers::ResetReasonToString(watchdog.GetResetReason()));
   APP_GPIOTE_INIT(2);
 
   spi.Init();
@@ -143,7 +125,6 @@ void SystemTask::Work() {
   dateTimeController.Register(this);
   batteryController.Register(this);
   motionSensor.SoftReset();
-  timerController.Init(this);
   alarmController.Init(this);
 
   // Reset the TWI device because the motion sensor chip most probably crashed it...
@@ -191,10 +172,7 @@ void SystemTask::Work() {
 
   batteryController.MeasureVoltage();
 
-  idleTimer = xTimerCreate("idleTimer", pdMS_TO_TICKS(2000), pdFALSE, this, IdleTimerCallback);
-  dimTimer = xTimerCreate("dimTimer", pdMS_TO_TICKS(settingsController.GetScreenTimeOut() - 2000), pdFALSE, this, DimTimerCallback);
   measureBatteryTimer = xTimerCreate("measureBattery", batteryMeasurementPeriod, pdTRUE, this, MeasureBatteryTimerCallback);
-  xTimerStart(dimTimer, 0);
   xTimerStart(measureBatteryTimer, portMAX_DELAY);
 
 #pragma clang diagnostic push
@@ -211,13 +189,10 @@ void SystemTask::Work() {
           if (!bleController.IsFirmwareUpdating()) {
             doNotGoToSleep = false;
           }
-          ReloadIdleTimer();
+          displayApp.PushMessage(Pinetime::Applications::Display::Messages::RestoreBrightness);
           break;
         case Messages::DisableSleeping:
           doNotGoToSleep = true;
-          break;
-        case Messages::UpdateTimeOut:
-          xTimerChangePeriod(dimTimer, pdMS_TO_TICKS(settingsController.GetScreenTimeOut() - 2000), 0);
           break;
         case Messages::GoToRunning:
           spi.Wakeup();
@@ -227,7 +202,6 @@ void SystemTask::Work() {
             touchPanel.Wakeup();
           }
 
-          xTimerStart(dimTimer, 0);
           spiNorFlash.Wakeup();
 
           displayApp.PushMessage(Pinetime::Applications::Display::Messages::GoToRunning);
@@ -238,7 +212,6 @@ void SystemTask::Work() {
           }
 
           state = SystemTaskState::Running;
-          isDimmed = false;
           break;
         case Messages::TouchWakeUp: {
           if (touchHandler.ProcessTouchInfo(touchPanel.GetTouchInfo())) {
@@ -260,13 +233,11 @@ void SystemTask::Work() {
           }
           state = SystemTaskState::GoingToSleep; // Already set in PushMessage()
           NRF_LOG_INFO("[systemtask] Going to sleep");
-          xTimerStop(idleTimer, 0);
-          xTimerStop(dimTimer, 0);
           displayApp.PushMessage(Pinetime::Applications::Display::Messages::GoToSleep);
           heartRateApp.PushMessage(Pinetime::Applications::HeartRateTask::Messages::GoToSleep);
           break;
         case Messages::OnNewTime:
-          ReloadIdleTimer();
+          displayApp.PushMessage(Pinetime::Applications::Display::Messages::RestoreBrightness);
           displayApp.PushMessage(Pinetime::Applications::Display::Messages::UpdateDateTime);
           if (alarmController.State() == Controllers::AlarmController::AlarmState::Set) {
             alarmController.ScheduleAlarm();
@@ -277,16 +248,10 @@ void SystemTask::Work() {
             if (state == SystemTaskState::Sleeping) {
               GoToRunning();
             } else {
-              ReloadIdleTimer();
+              displayApp.PushMessage(Pinetime::Applications::Display::Messages::RestoreBrightness);
             }
             displayApp.PushMessage(Pinetime::Applications::Display::Messages::NewNotification);
           }
-          break;
-        case Messages::OnTimerDone:
-          if (state == SystemTaskState::Sleeping) {
-            GoToRunning();
-          }
-          displayApp.PushMessage(Pinetime::Applications::Display::Messages::TimerDone);
           break;
         case Messages::SetOffAlarm:
           if (state == SystemTaskState::Sleeping) {
@@ -295,7 +260,7 @@ void SystemTask::Work() {
           displayApp.PushMessage(Pinetime::Applications::Display::Messages::AlarmTriggered);
           break;
         case Messages::BleConnected:
-          ReloadIdleTimer();
+          displayApp.PushMessage(Pinetime::Applications::Display::Messages::RestoreBrightness);
           isBleDiscoveryTimerRunning = true;
           bleDiscoveryTimer = 5;
           break;
@@ -311,7 +276,6 @@ void SystemTask::Work() {
             NVIC_SystemReset();
           }
           doNotGoToSleep = false;
-          xTimerStart(dimTimer, 0);
           break;
         case Messages::StartFileTransfer:
           NRF_LOG_INFO("[systemtask] FS Started");
@@ -324,12 +288,10 @@ void SystemTask::Work() {
         case Messages::StopFileTransfer:
           NRF_LOG_INFO("[systemtask] FS Stopped");
           doNotGoToSleep = false;
-          xTimerStart(dimTimer, 0);
           // TODO add intent of fs access icon or something
           break;
         case Messages::OnTouchEvent:
           if (touchHandler.ProcessTouchInfo(touchPanel.GetTouchInfo())) {
-            ReloadIdleTimer();
             displayApp.PushMessage(Pinetime::Applications::Display::Messages::TouchEvent);
           }
           break;
@@ -397,7 +359,6 @@ void SystemTask::Work() {
         case Messages::OnChargingEvent:
           batteryController.ReadPowerState();
           displayApp.PushMessage(Applications::Display::Messages::OnChargingEvent);
-          ReloadIdleTimer();
           if (state == SystemTaskState::Sleeping) {
             GoToRunning();
           }
@@ -408,16 +369,6 @@ void SystemTask::Work() {
         case Messages::BatteryPercentageUpdated:
           nimbleController.NotifyBatteryLevel(batteryController.PercentRemaining());
           break;
-        case Messages::LowBattery: {
-          Pinetime::Controllers::NotificationManager::Notification notif;
-          constexpr char message[] = "Low Battery\0Charge your watch to prevent data loss.\0";
-          constexpr size_t messageSize = std::min(sizeof(message), Pinetime::Controllers::NotificationManager::MaximumMessageSize());
-          std::memcpy(notif.message.data(), message, messageSize);
-          notif.size = messageSize;
-          notif.category = Pinetime::Controllers::NotificationManager::Categories::SimpleAlert;
-          notificationManager.Push(std::move(notif));
-          PushMessage(Messages::OnNewNotification);
-        } break;
         case Messages::OnPairing:
           if (state == SystemTaskState::Sleeping) {
             GoToRunning();
@@ -452,7 +403,7 @@ void SystemTask::Work() {
     dateTimeController.UpdateTime(systick_counter);
     NoInit_BackUpTime = dateTimeController.CurrentDateTime();
     if (nrf_gpio_pin_read(PinMap::Button) == 0) {
-      watchdog.Kick();
+      watchdog.Reload();
     }
   }
 #pragma clang diagnostic pop
@@ -475,14 +426,13 @@ void SystemTask::UpdateMotion() {
 
   auto motionValues = motionSensor.Process();
 
-  motionController.IsSensorOk(motionSensor.IsOk());
   motionController.Update(motionValues.x, motionValues.y, motionValues.z, motionValues.steps);
 
   if (settingsController.GetNotificationStatus() != Controllers::Settings::Notification::Sleep) {
     if ((settingsController.isWakeUpModeOn(Pinetime::Controllers::Settings::WakeUpMode::RaiseWrist) &&
-         motionController.Should_RaiseWake(state == SystemTaskState::Sleeping)) ||
+         motionController.ShouldRaiseWake(state == SystemTaskState::Sleeping)) ||
         (settingsController.isWakeUpModeOn(Pinetime::Controllers::Settings::WakeUpMode::Shake) &&
-         motionController.Should_ShakeWake(settingsController.GetShakeThreshold()))) {
+         motionController.ShouldShakeWake(settingsController.GetShakeThreshold()))) {
       GoToRunning();
     }
   }
@@ -493,7 +443,7 @@ void SystemTask::HandleButtonAction(Controllers::ButtonActions action) {
     return;
   }
 
-  ReloadIdleTimer();
+  displayApp.PushMessage(Pinetime::Applications::Display::Messages::RestoreBrightness);
 
   using Actions = Controllers::ButtonActions;
 
@@ -553,34 +503,4 @@ void SystemTask::PushMessage(System::Messages msg) {
   } else {
     xQueueSend(systemTasksMsgQueue, &msg, portMAX_DELAY);
   }
-}
-
-void SystemTask::OnDim() {
-  if (doNotGoToSleep) {
-    return;
-  }
-  NRF_LOG_INFO("Dim timeout -> Dim screen")
-  displayApp.PushMessage(Pinetime::Applications::Display::Messages::DimScreen);
-  xTimerStart(idleTimer, 0);
-  isDimmed = true;
-}
-
-void SystemTask::OnIdle() {
-  if (doNotGoToSleep) {
-    return;
-  }
-  NRF_LOG_INFO("Idle timeout -> Going to sleep")
-  PushMessage(Messages::GoToSleep);
-}
-
-void SystemTask::ReloadIdleTimer() {
-  if (state != SystemTaskState::Running) {
-    return;
-  }
-  if (isDimmed) {
-    displayApp.PushMessage(Pinetime::Applications::Display::Messages::RestoreBrightness);
-    isDimmed = false;
-  }
-  xTimerReset(dimTimer, 0);
-  xTimerStop(idleTimer, 0);
 }

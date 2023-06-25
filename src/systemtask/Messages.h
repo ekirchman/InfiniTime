@@ -9,10 +9,8 @@ namespace Pinetime {
       TouchWakeUp,
       OnNewTime,
       OnNewNotification,
-      OnTimerDone,
       OnNewCall,
       BleConnected,
-      UpdateTimeOut,
       BleFirmwareUpdateStarted,
       BleFirmwareUpdateFinished,
       OnTouchEvent,
@@ -29,7 +27,6 @@ namespace Pinetime {
       SetOffAlarm,
       MeasureBatteryTimerExpired,
       BatteryPercentageUpdated,
-      LowBattery,
       StartFileTransfer,
       StopFileTransfer,
       BleRadioEnableToggle
