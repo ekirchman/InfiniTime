@@ -49,6 +49,7 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
                                  Controllers::NotificationManager& notificationManager,
                                  Controllers::Settings& settingsController)
   : currentDateTime {{}},
+    batteryIcon(true),
     dateTimeController {dateTimeController},
     batteryController {batteryController},
     bleController {bleController},

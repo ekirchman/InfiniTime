@@ -10,6 +10,7 @@
 #include "components/ble/BleController.h"
 #include "components/ble/NotificationManager.h"
 #include <displayapp/screens/BatteryIcon.h>
+#include "utility/DirtyValue.h"
 
 namespace Pinetime {
   namespace Controllers {
@@ -41,11 +42,11 @@ namespace Pinetime {
         Pinetime::Controllers::DateTime::Days currentDayOfWeek = Pinetime::Controllers::DateTime::Days::Unknown;
         uint8_t currentDay = 0;
 
-        DirtyValue<uint8_t> batteryPercentRemaining {0};
-        DirtyValue<bool> isCharging {};
-        DirtyValue<bool> bleState {};
-        DirtyValue<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>> currentDateTime;
-        DirtyValue<bool> notificationState {false};
+        Utility::DirtyValue<uint8_t> batteryPercentRemaining {0};
+        Utility::DirtyValue<bool> isCharging {};
+        Utility::DirtyValue<bool> bleState {};
+        Utility::DirtyValue<std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>> currentDateTime;
+        Utility::DirtyValue<bool> notificationState {false};
 
         lv_obj_t* label_time;
 
