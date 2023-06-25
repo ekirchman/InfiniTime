@@ -160,7 +160,7 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
 
   //Add digital time
   label_time = lv_label_create(lv_scr_act(), nullptr);
-  // lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_extrabold_compressed);
+  lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_42);
 
   taskRefresh = lv_task_create(RefreshTaskCallback, LV_DISP_DEF_REFR_PERIOD, LV_TASK_PRIO_MID, this);
 
