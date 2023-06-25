@@ -42,6 +42,8 @@ namespace Pinetime {
         Pinetime::Controllers::DateTime::Days currentDayOfWeek = Pinetime::Controllers::DateTime::Days::Unknown;
         uint8_t currentDay = 0;
 
+        int8_t digitalTimeVOffset = 60;
+
         Utility::DirtyValue<uint8_t> batteryPercentRemaining {0};
         Utility::DirtyValue<bool> isCharging {};
         Utility::DirtyValue<bool> bleState {};

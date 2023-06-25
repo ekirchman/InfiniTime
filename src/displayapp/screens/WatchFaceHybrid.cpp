@@ -220,7 +220,19 @@ void WatchFaceHybrid::UpdateClock() {
       twelve_hour = hour;
     }
     lv_label_set_text_fmt(label_time, "%2d:%02d", twelve_hour, minute);
-    lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_CENTER, 0, 50);
+
+    // adjust the digital time to avoid the minute hand covering it up
+    if(minute > 20 && minute < 40){
+      //move to top of screen
+      digitalTimeVOffset = -60;
+    }
+    if(minute < 10 || minute > 50){
+      // move to bottom of screen
+      digitalTimeVOffset = 60;
+    }
+    //if between mins 10-20 and 40-50, stay on whichever side of the screen it was before
+    lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_CENTER, 0, digitalTimeVOffset);
+
   }
 
   if (sSecond != second) {
