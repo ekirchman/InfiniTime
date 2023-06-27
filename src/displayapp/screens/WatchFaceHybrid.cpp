@@ -265,6 +265,12 @@ void WatchFaceHybrid::Refresh() {
   if (!isCharging.Get()) {
     batteryPercentRemaining = batteryController.PercentRemaining();
     if (batteryPercentRemaining.IsUpdated()) {
+      //Hide battery if below 20 percent
+      if(batteryPercentRemaining.Get() > 20){
+        lv_obj_set_hidden(batteryIcon.GetObject(), true);
+      }else{
+        lv_obj_set_hidden(batteryIcon.GetObject(), false);
+      }
       SetBatteryIcon();
     }
   }
