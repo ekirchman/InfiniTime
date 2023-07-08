@@ -232,7 +232,7 @@ void WatchFaceHybrid::UpdateClock() {
     }else{
       twelve_hour = hour;
     }
-    lv_label_set_text_fmt(label_time, "%2d:%02d", twelve_hour, minute);
+    lv_label_set_text_fmt(label_time, "%02d:%02d", twelve_hour, minute);
 
     // adjust the digital time to avoid the minute hand covering it up
     if(minute > 20 && minute < 40){
