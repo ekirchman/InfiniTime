@@ -141,5 +141,6 @@ std::unique_ptr<Screen> Clock::WatchFaceHybridScreen() {
                                                     batteryController,
                                                     bleController,
                                                     notificationManager,
-                                                    settingsController);
+                                                    settingsController,
+                                                    filesystem);
 }

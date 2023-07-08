@@ -47,7 +47,8 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
                                  const Controllers::Battery& batteryController,
                                  const Controllers::Ble& bleController,
                                  Controllers::NotificationManager& notificationManager,
-                                 Controllers::Settings& settingsController)
+                                 Controllers::Settings& settingsController,
+                                 Controllers::FS& filesystem)
   : currentDateTime {{}},
     batteryIcon(true),
     dateTimeController {dateTimeController},
@@ -160,8 +161,20 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
   // lv_obj_add_style(hour_body_trace, LV_LINE_PART_MAIN, &hour_line_style_trace);
 
   //Add digital time
+  lv_font_t* font_leco = nullptr;
+  lfs_file f = {};
   label_time = lv_label_create(lv_scr_act(), nullptr);
-  lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_42);
+
+  if (filesystem.FileOpen(&f, "/fonts/LECO_1976_Regular.bin", LFS_O_RDONLY) >= 0) {
+      filesystem.FileClose(&f);
+      font_leco = lv_font_load("F:/fonts/LECO_1976_Regular.bin");
+  }
+
+  if(font_leco != nullptr){
+    lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, font_leco);
+  }else{
+    lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_42);
+  }
 
   taskRefresh = lv_task_create(RefreshTaskCallback, LV_DISP_DEF_REFR_PERIOD, LV_TASK_PRIO_MID, this);
 
