@@ -29,7 +29,8 @@ namespace Pinetime {
                         const Controllers::Battery& batteryController,
                         const Controllers::Ble& bleController,
                         Controllers::NotificationManager& notificationManager,
-                        Controllers::Settings& settingsController);
+                        Controllers::Settings& settingsController,
+                        Controllers::FS& filesystem);
 
         ~WatchFaceHybrid() override;
 
