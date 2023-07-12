@@ -70,11 +70,14 @@ namespace Pinetime {
         lv_style_t minute_line_style;
         lv_style_t minute_line_style_trace;
         lv_style_t second_line_style;
+        lv_style_t tick_style_line;
 
         lv_obj_t* label_date_day;
         lv_obj_t* plugIcon;
         lv_obj_t* notificationIcon;
         lv_obj_t* bleIcon;
+
+        lv_font_t* font_leco = nullptr;
 
         BatteryIcon batteryIcon;
 
@@ -88,6 +91,17 @@ namespace Pinetime {
         void SetBatteryIcon();
 
         lv_task_t* taskRefresh;
+
+        // create 12, 3, 6, and 9 oclock lines
+        lv_obj_t * line12;
+        lv_obj_t * line3;
+        lv_obj_t * line6;
+        lv_obj_t * line9;
+
+        lv_point_t line_points_12[2] = {{120, 0}, {120, 35}}; // 12
+        lv_point_t line_points_3[2] = {{240, 120}, {205 , 120}}; // 3
+        lv_point_t line_points_6[2] = {{120, 240}, {120, 205}}; // 6
+        lv_point_t line_points_9[2] = {{0, 120}, {35, 120}}; // 9
       };
     }
   }
