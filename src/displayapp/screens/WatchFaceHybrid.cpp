@@ -95,38 +95,25 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
   hour_body_trace = lv_line_create(lv_scr_act(), nullptr);
   second_body = lv_line_create(lv_scr_act(), nullptr);
 
-  // create 12, 3, 6, and 9 oclock lines
-  static lv_point_t line_points_12[] = {{120, 0}, {120, 35}}; // 12
-  static lv_point_t line_points_3[] = {{240, 120}, {205 , 120}}; // 3
-  static lv_point_t line_points_6[] = {{120, 240}, {120, 205}}; // 6
-  static lv_point_t line_points_9[] = {{0, 120}, {35, 120}}; // 9
+  /*Create watchface tick lines*/
+  lv_style_init(&tick_style_line);
+  lv_style_set_line_width(&tick_style_line, LV_STATE_DEFAULT, 2);
+  lv_style_set_line_color(&tick_style_line, LV_STATE_DEFAULT, LV_COLOR_WHITE);
 
-  /*Create style*/
-  static lv_style_t style_line;
-  lv_style_init(&style_line);
-  lv_style_set_line_width(&style_line, LV_STATE_DEFAULT, 2);
-  lv_style_set_line_color(&style_line, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-
-  /*Create a line and apply the new style*/
-  lv_obj_t * line12;
-  lv_obj_t * line3;
-  lv_obj_t * line6;
-  lv_obj_t * line9;
-
-  line12 = lv_line_create(lv_scr_act(), NULL);
-  line3 = lv_line_create(lv_scr_act(), NULL);
-  line6 = lv_line_create(lv_scr_act(), NULL);
-  line9 = lv_line_create(lv_scr_act(), NULL);
+  line12 = lv_line_create(lv_scr_act(), nullptr);
+  line3 = lv_line_create(lv_scr_act(), nullptr);
+  line6 = lv_line_create(lv_scr_act(), nullptr);
+  line9 = lv_line_create(lv_scr_act(), nullptr);
 
   lv_line_set_points(line12, line_points_12, 2);     /*Set the points*/
   lv_line_set_points(line3, line_points_3, 2);     /*Set the points*/
   lv_line_set_points(line6, line_points_6, 2);     /*Set the points*/
   lv_line_set_points(line9, line_points_9, 2);     /*Set the points*/
 
-  lv_obj_add_style(line12, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
-  lv_obj_add_style(line3, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
-  lv_obj_add_style(line6, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
-  lv_obj_add_style(line9, LV_LINE_PART_MAIN, &style_line);     /*Set the points*/
+  lv_obj_add_style(line12, LV_LINE_PART_MAIN, &tick_style_line);     /*Set the points*/
+  lv_obj_add_style(line3, LV_LINE_PART_MAIN, &tick_style_line);     /*Set the points*/
+  lv_obj_add_style(line6, LV_LINE_PART_MAIN, &tick_style_line);     /*Set the points*/
+  lv_obj_add_style(line9, LV_LINE_PART_MAIN, &tick_style_line);     /*Set the points*/
   // lv_obj_align(line1, NULL, LV_ALIGN_CENTER, 0, 0);
   // Finish the 12, 3, 6, and 9 oclock lines
 
@@ -161,7 +148,6 @@ WatchFaceHybrid::WatchFaceHybrid(Controllers::DateTime& dateTimeController,
   // lv_obj_add_style(hour_body_trace, LV_LINE_PART_MAIN, &hour_line_style_trace);
 
   //Add digital time
-  lv_font_t* font_leco = nullptr;
   lfs_file f = {};
   label_time = lv_label_create(lv_scr_act(), nullptr);
 
@@ -189,6 +175,11 @@ WatchFaceHybrid::~WatchFaceHybrid() {
   lv_style_reset(&minute_line_style);
   lv_style_reset(&minute_line_style_trace);
   lv_style_reset(&second_line_style);
+  lv_style_reset(&tick_style_line);
+
+  if (font_leco != nullptr) {
+    lv_font_free(font_leco);
+  }
 
   lv_obj_clean(lv_scr_act());
 }
