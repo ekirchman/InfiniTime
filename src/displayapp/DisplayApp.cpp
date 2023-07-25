@@ -30,6 +30,7 @@
 #include "displayapp/screens/PassKey.h"
 #include "displayapp/screens/Error.h"
 #include "displayapp/screens/Weather.h"
+#include "displayapp/screens/Doom.h"
 
 #include "drivers/Cst816s.h"
 #include "drivers/St7789.h"
@@ -536,6 +537,9 @@ void DisplayApp::LoadScreen(Apps app, DisplayApp::FullRefreshDirections directio
       break;
     case Apps::HeartRate:
       currentScreen = std::make_unique<Screens::HeartRate>(heartRateController, *systemTask);
+      break;
+    case Apps::Doom:
+      currentScreen = std::make_unique<Screens::Doom>(this);
       break;
     case Apps::Metronome:
       currentScreen = std::make_unique<Screens::Metronome>(motorController, *systemTask);
