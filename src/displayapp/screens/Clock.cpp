@@ -14,6 +14,7 @@
 #include "displayapp/screens/WatchFacePineTimeStyle.h"
 #include "displayapp/screens/WatchFaceCasioStyleG7710.h"
 #include "displayapp/screens/WatchFaceHybrid.h"
+#include "displayapp/screens/WatchFaceFEPT.h"
 
 using namespace Pinetime::Applications::Screens;
 using namespace Pinetime::Applications;
@@ -58,6 +59,9 @@ Clock::Clock(Controllers::DateTime& dateTimeController,
           break;
         case WatchFace::WatchFaceHybrid:
           return WatchFaceHybridScreen();
+          break;
+        case WatchFace::WatchFaceFEPT:
+          return WatchFaceFEPTScreen();
           break;
       }
       return WatchFaceDigitalScreen();
@@ -143,4 +147,14 @@ std::unique_ptr<Screen> Clock::WatchFaceHybridScreen() {
                                                     notificationManager,
                                                     settingsController,
                                                     filesystem);
+}
+
+std::unique_ptr<Screen> Clock::WatchFaceFEPTScreen() {
+  return std::make_unique<Screens::WatchFaceFEPT>(dateTimeController,
+                                                     batteryController,
+                                                     bleController,
+                                                     notificationManager,
+                                                     settingsController,
+                                                     heartRateController,
+                                                     motionController);
 }

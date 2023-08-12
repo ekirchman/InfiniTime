@@ -434,6 +434,7 @@ list(APPEND SOURCE_FILES
         displayapp/screens/WatchFacePineTimeStyle.cpp
         displayapp/screens/WatchFaceCasioStyleG7710.cpp
         displayapp/screens/WatchFaceHybrid.cpp
+        displayapp/screens/WatchFaceFEPT.cpp
 
         ##
 

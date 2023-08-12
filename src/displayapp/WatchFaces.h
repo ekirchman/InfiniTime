@@ -10,6 +10,7 @@ namespace Pinetime {
       Infineat = 4,
       CasioStyleG7710 = 5,
       WatchFaceHybrid = 6,
+      WatchFaceFEPT = 7,
     };
   }
 }

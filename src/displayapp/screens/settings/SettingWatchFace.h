@@ -12,6 +12,7 @@
 #include "displayapp/screens/WatchFaceInfineat.h"
 #include "displayapp/screens/WatchFaceCasioStyleG7710.h"
 #include "displayapp/screens/WatchFaceHybrid.h"
+#include "displayapp/screens/WatchFaceFEPT.h"
 
 namespace Pinetime {
 
@@ -49,7 +50,7 @@ namespace Pinetime {
            {"Infineat face", Applications::Screens::WatchFaceInfineat::IsAvailable(filesystem)},
            {"Casio G7710", Applications::Screens::WatchFaceCasioStyleG7710::IsAvailable(filesystem)},
            {"Hybrid", true},
-           {"", false}}};
+           {"FEPT", true}}};
         ScreenList<nScreens> screens;
       };
     }
