@@ -64,6 +64,8 @@ namespace Pinetime {
 
         lv_font_t* font_outline = nullptr;
 
+        lv_obj_t* background_img = nullptr;
+
         Controllers::DateTime& dateTimeController;
         Controllers::NotificationManager& notificationManager;
         Controllers::Settings& settingsController;

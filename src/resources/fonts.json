@@ -79,7 +79,7 @@
          }
       ],
       "bpp": 1,
-      "size": 80,
+      "size": 60,
       "format": "bin",
       "target_path": "/fonts/"
    },

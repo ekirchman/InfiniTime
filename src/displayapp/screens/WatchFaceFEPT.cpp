@@ -29,6 +29,18 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
     motionController {motionController},
     statusIcons(batteryController, bleController) {
 
+  lfs_file f = {};
+  //Add background
+  background_img = lv_img_create(lv_scr_act(), nullptr);
+  if (filesystem.FileOpen(&f, "/images/FEPT/BGNight.bin", LFS_O_RDONLY) >= 0) {
+      lv_img_set_src(background_img, "F:/images/FEPT/BGNight.bin");
+      filesystem.FileClose(&f);
+  }
+
+  if(background_img != nullptr){
+    lv_img_set_auto_size(background_img, true);
+  }
+
   statusIcons.Create();
 
   notificationIcon = lv_label_create(lv_scr_act(), nullptr);
@@ -40,8 +52,9 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
   lv_obj_align(label_date, lv_scr_act(), LV_ALIGN_CENTER, 0, 60);
   lv_obj_set_style_local_text_color(label_date, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x999999));
 
-  //Add digital time
-  lfs_file f = {};
+
+
+  //Set time label and time font
   label_time = lv_label_create(lv_scr_act(), nullptr);
 
   if (filesystem.FileOpen(&f, "/fonts/Outline.bin", LFS_O_RDONLY) >= 0) {
@@ -52,14 +65,8 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
   if(font_outline != nullptr){
     lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, font_outline);
   }else{
-    // lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_42);
     lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_extrabold_compressed);
   }
-
-  // label_time = lv_label_create(lv_scr_act(), nullptr);
-  // lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_extrabold_compressed);
-
-  lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_IN_RIGHT_MID, 0, 0);
 
   label_time_ampm = lv_label_create(lv_scr_act(), nullptr);
   lv_label_set_text_static(label_time_ampm, "");
@@ -120,10 +127,10 @@ void WatchFaceFEPT::Refresh() {
       }
       lv_label_set_text(label_time_ampm, ampmChar);
       lv_label_set_text_fmt(label_time, "%2d:%02d", hour, minute);
-      lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_IN_RIGHT_MID, 0, 0);
+      lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_IN_RIGHT_MID, 0, -30);
     } else {
       lv_label_set_text_fmt(label_time, "%02d:%02d", hour, minute);
-      lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_CENTER, 0, 0);
+      lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_CENTER, 0, -30);
     }
 
     currentDate = std::chrono::time_point_cast<days>(currentDateTime.Get());
