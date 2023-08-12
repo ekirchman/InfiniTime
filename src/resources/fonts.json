@@ -70,5 +70,29 @@
       "size": 40,
       "format": "bin",
       "target_path": "/fonts/"
+   },
+   "Outline" : {
+      "sources": [
+         {
+            "file": "fonts/Outline.ttf",
+            "symbols": "0123456789: -"
+         }
+      ],
+      "bpp": 1,
+      "size": 80,
+      "format": "bin",
+      "target_path": "/fonts/"
+   },
+   "Solid" : {
+      "sources": [
+         {
+            "file": "fonts/Solid.ttf",
+            "symbols": "0123456789: -"
+         }
+      ],
+      "bpp": 1,
+      "size": 80,
+      "format": "bin",
+      "target_path": "/fonts/"
    }
 }

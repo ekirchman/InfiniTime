@@ -156,5 +156,6 @@ std::unique_ptr<Screen> Clock::WatchFaceFEPTScreen() {
                                                      notificationManager,
                                                      settingsController,
                                                      heartRateController,
-                                                     motionController);
+                                                     motionController,
+                                                     filesystem);
 }

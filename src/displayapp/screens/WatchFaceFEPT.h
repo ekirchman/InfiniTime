@@ -31,7 +31,8 @@ namespace Pinetime {
                          Controllers::NotificationManager& notificationManager,
                          Controllers::Settings& settingsController,
                          Controllers::HeartRateController& heartRateController,
-                         Controllers::MotionController& motionController);
+                         Controllers::MotionController& motionController,
+                         Controllers::FS& filesystem);
         ~WatchFaceFEPT() override;
 
         void Refresh() override;
@@ -60,6 +61,8 @@ namespace Pinetime {
         lv_obj_t* stepIcon;
         lv_obj_t* stepValue;
         lv_obj_t* notificationIcon;
+
+        lv_font_t* font_outline = nullptr;
 
         Controllers::DateTime& dateTimeController;
         Controllers::NotificationManager& notificationManager;

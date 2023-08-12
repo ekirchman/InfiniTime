@@ -19,7 +19,8 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
                                    Controllers::NotificationManager& notificationManager,
                                    Controllers::Settings& settingsController,
                                    Controllers::HeartRateController& heartRateController,
-                                   Controllers::MotionController& motionController)
+                                   Controllers::MotionController& motionController,
+                                   Controllers::FS& filesystem)
   : currentDateTime {{}},
     dateTimeController {dateTimeController},
     notificationManager {notificationManager},
@@ -39,8 +40,24 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
   lv_obj_align(label_date, lv_scr_act(), LV_ALIGN_CENTER, 0, 60);
   lv_obj_set_style_local_text_color(label_date, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x999999));
 
+  //Add digital time
+  lfs_file f = {};
   label_time = lv_label_create(lv_scr_act(), nullptr);
-  lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_extrabold_compressed);
+
+  if (filesystem.FileOpen(&f, "/fonts/Outline.bin", LFS_O_RDONLY) >= 0) {
+      filesystem.FileClose(&f);
+      font_outline = lv_font_load("F:/fonts/Outline.bin");
+  }
+
+  if(font_outline != nullptr){
+    lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, font_outline);
+  }else{
+    // lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_42);
+    lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_extrabold_compressed);
+  }
+
+  // label_time = lv_label_create(lv_scr_act(), nullptr);
+  // lv_obj_set_style_local_text_font(label_time, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_extrabold_compressed);
 
   lv_obj_align(label_time, lv_scr_act(), LV_ALIGN_IN_RIGHT_MID, 0, 0);
 
