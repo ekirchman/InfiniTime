@@ -41,6 +41,18 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
     lv_img_set_auto_size(background_img, true);
   }
 
+  //Add enemy
+  enemy_img = lv_img_create(lv_scr_act(), nullptr);
+  if (filesystem.FileOpen(&f, "/images/FEPT/Enemy.bin", LFS_O_RDONLY) >= 0) {
+      lv_img_set_src(enemy_img, "F:/images/FEPT/Enemy.bin");
+      filesystem.FileClose(&f);
+  }
+
+  if(enemy_img != nullptr){
+    lv_img_set_auto_size(enemy_img, true);
+  }
+  lv_obj_align(enemy_img, nullptr, LV_ALIGN_IN_LEFT_MID, 0, 60);
+
   statusIcons.Create();
 
   notificationIcon = lv_label_create(lv_scr_act(), nullptr);
