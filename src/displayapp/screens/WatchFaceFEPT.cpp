@@ -13,6 +13,8 @@
 
 using namespace Pinetime::Applications::Screens;
 
+LV_IMG_DECLARE(bg_clock);
+
 WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
                                    const Controllers::Battery& batteryController,
                                    const Controllers::Ble& bleController,
@@ -30,7 +32,9 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
     statusIcons(batteryController, bleController) {
 
   lfs_file f = {};
+  // filesys = *filesystem;
   //Add background
+ /*
   background_img = lv_img_create(lv_scr_act(), nullptr);
   if (filesystem.FileOpen(&f, "/images/FEPT/BGNight.bin", LFS_O_RDONLY) >= 0) {
       lv_img_set_src(background_img, "F:/images/FEPT/BGNight.bin");
@@ -38,9 +42,10 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
   }
 
   if(background_img != nullptr){
-    lv_img_set_auto_size(background_img, true);
+    lv_img_set_zoom(background_img, 256);
+    // lv_img_set_auto_size(background_img, true);
   }
-
+  */
   //Add enemy
   enemy_img = lv_img_create(lv_scr_act(), nullptr);
   if (filesystem.FileOpen(&f, "/images/FEPT/Enemy.bin", LFS_O_RDONLY) >= 0) {
@@ -49,9 +54,16 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
   }
 
   if(enemy_img != nullptr){
-    lv_img_set_auto_size(enemy_img, true);
+    // lv_img_set_auto_size(enemy_img, true);
+    lv_img_set_zoom(enemy_img, 512);
   }
-  lv_obj_align(enemy_img, nullptr, LV_ALIGN_IN_LEFT_MID, 0, 60);
+  lv_obj_align(enemy_img, nullptr, LV_ALIGN_IN_LEFT_MID, 10, 50);
+
+  //Add hero
+  hero_img = lv_img_create(lv_scr_act(), nullptr);
+  lv_img_set_src(hero_img, &hero);
+
+  lv_obj_align(hero_img, nullptr, LV_ALIGN_IN_RIGHT_MID, 0, 00);
 
   statusIcons.Create();
 
@@ -104,7 +116,8 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
   lv_label_set_text_static(stepIcon, Symbols::shoe);
   lv_obj_align(stepIcon, stepValue, LV_ALIGN_OUT_LEFT_MID, -5, 0);
 
-  taskRefresh = lv_task_create(RefreshTaskCallback, LV_DISP_DEF_REFR_PERIOD, LV_TASK_PRIO_MID, this);
+  //This will cause Refresh to be called every 20 ms
+  // taskRefresh = lv_task_create(RefreshTaskCallback, LV_DISP_DEF_REFR_PERIOD, LV_TASK_PRIO_MID, this);
   Refresh();
 }
 
@@ -115,6 +128,12 @@ WatchFaceFEPT::~WatchFaceFEPT() {
 
 void WatchFaceFEPT::Refresh() {
   statusIcons.Update();
+  /*
+  enemy_img = lv_img_create(lv_scr_act(), nullptr);
+  if (filesystem1.FileOpen(&f, "/images/FEPT/Enemy.bin", LFS_O_RDONLY) >= 0) {
+      lv_img_set_src(enemy_img, "F:/images/FEPT/Enemy.bin");
+      filesystem.FileClose(&f);
+  }*/
 
   notificationState = notificationManager.AreNewNotificationsAvailable();
   if (notificationState.IsUpdated()) {
@@ -166,6 +185,8 @@ void WatchFaceFEPT::Refresh() {
       }
       lv_obj_realign(label_date);
     }
+
+    updateAnimation();
   }
 
   heartbeat = heartRateController.HeartRate();
@@ -189,4 +210,93 @@ void WatchFaceFEPT::Refresh() {
     lv_obj_realign(stepValue);
     lv_obj_realign(stepIcon);
   }
+}
+
+void WatchFaceFEPT::updateAnimation() {
+  uint8_t second = dateTimeController.Seconds();
+  if(second != mSecond){
+    mSecond = second;
+    heroFrameCnt++;
+    if(heroFrameCnt >= LYN_MAX_FRAME_COUNT){
+      //Reset hero animation back to img 0, with the next frame of animation being 1
+      heroFrameCnt = 1;
+    }else{
+      //Update to next frame
+    }
+  }
+}
+
+void WatchFaceFEPT::loadFrames(Pinetime::Controllers::FS& filesystem) {
+  lfs_file f = {};
+  for(uint8_t frameCnt =  1; frameCnt < LYN_MAX_FRAME_COUNT; frameCnt++){
+    if(11 == frameCnt){
+      //skip img to save on flash storage
+      //img 11 is the same as 9
+      continue;
+    }
+    if(14 == frameCnt){
+      //skip img to save on flash storage
+      //img 14 is the same as 12
+      continue;
+    }
+    if(17 == frameCnt){
+      //skip img to save on flash storage
+      //img 17 is the same as 15
+      continue;
+    }
+    if(19 == frameCnt){
+      //skip img to save on flash storage
+      //img 19 is the same as 16
+      continue;
+    }
+    if(23 == frameCnt){
+      //skip img to save on flash storage
+      //img 23 is the same as 21
+      continue;
+    }
+    if(29 == frameCnt){
+      //skip img to save on flash storage
+      //img 29 is the same as 27
+      continue;
+    }
+    if(35 == frameCnt){
+      //skip img to save on flash storage
+      //img 35 is the same as 31, but flipped vertically
+      continue;
+    }
+    if(36 == frameCnt){
+      //skip img to save on flash storage
+      //img 36 is the same as 32, but flipped vertically
+      continue;
+    }
+    if(28 == frameCnt || 30 == frameCnt || 34 == frameCnt){
+      //These are invisible frames
+      //skip img to save on flash storage
+      continue;
+    }
+    if(40 == frameCnt){
+      //skip img to save on flash storage
+      //img 40 is a all white image
+      continue;
+    }
+    if(44 == frameCnt){
+      //skip img to save on flash storage
+      continue;
+    }
+    if(49 == frameCnt){
+      //skip img to save on flash storage
+      //img 49 is the same as 48, but moved slightly to the right
+      continue;
+    }
+    if(65 == frameCnt){
+      //skip img to save on flash storage
+      //img 65 is the same as 00
+      continue;
+    }
+    std::string fd1 = "/images/FEPT/LYN" + std::to_string(frameCnt) + ".bin";
+    std::string fd2 = "F:/images/FEPT/LYN" + std::to_string(frameCnt) + ".bin";
+
+    // lv_obj_align(enemy_img, nullptr, LV_ALIGN_IN_LEFT_MID, 0, 60);
+  }
+  filesystem.FileClose(&f);
 }
