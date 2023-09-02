@@ -19,7 +19,6 @@
       "output_format": "bin",
       "binary_format": "ARGB8565_RBSWAP",
       "target_path": "/images/"
-      "target_path": "/images/FEPT/"
    },
    "Enemy" : {
       "sources": "images/FEPT/Enemy.png",
