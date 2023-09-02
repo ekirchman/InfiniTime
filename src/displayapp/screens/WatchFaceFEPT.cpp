@@ -11,9 +11,10 @@
 #include "components/motion/MotionController.h"
 #include "components/settings/Settings.h"
 
-using namespace Pinetime::Applications::Screens;
+LV_IMG_DECLARE(hero);
+// LV_IMG_DECLARE(bg_clock1);
 
-LV_IMG_DECLARE(bg_clock);
+using namespace Pinetime::Applications::Screens;
 
 WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
                                    const Controllers::Battery& batteryController,
@@ -55,15 +56,18 @@ WatchFaceFEPT::WatchFaceFEPT(Controllers::DateTime& dateTimeController,
 
   if(enemy_img != nullptr){
     // lv_img_set_auto_size(enemy_img, true);
-    lv_img_set_zoom(enemy_img, 512);
   }
   lv_obj_align(enemy_img, nullptr, LV_ALIGN_IN_LEFT_MID, 10, 50);
 
   //Add hero
   hero_img = lv_img_create(lv_scr_act(), nullptr);
   lv_img_set_src(hero_img, &hero);
+  // lv_obj_align(hero_img, nullptr, LV_ALIGN_IN_RIGHT_MID, 0, 00);
+  // lv_img_set_zoom(hero_img, 512);
 
-  lv_obj_align(hero_img, nullptr, LV_ALIGN_IN_RIGHT_MID, 0, 00);
+  // lv_obj_t* bg_clock_img = lv_img_create(lv_scr_act(), nullptr);
+  // lv_img_set_src(bg_clock_img, &bg_clock1);
+
 
   statusIcons.Create();
 
@@ -128,12 +132,6 @@ WatchFaceFEPT::~WatchFaceFEPT() {
 
 void WatchFaceFEPT::Refresh() {
   statusIcons.Update();
-  /*
-  enemy_img = lv_img_create(lv_scr_act(), nullptr);
-  if (filesystem1.FileOpen(&f, "/images/FEPT/Enemy.bin", LFS_O_RDONLY) >= 0) {
-      lv_img_set_src(enemy_img, "F:/images/FEPT/Enemy.bin");
-      filesystem.FileClose(&f);
-  }*/
 
   notificationState = notificationManager.AreNewNotificationsAvailable();
   if (notificationState.IsUpdated()) {

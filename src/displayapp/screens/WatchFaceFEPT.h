@@ -85,8 +85,6 @@ namespace Pinetime {
 
         lv_task_t* taskRefresh;
         Widgets::StatusIcons statusIcons;
-
-        lv_obj_t* hero;
       };
     }
   }
